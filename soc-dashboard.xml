@@ -1,0 +1,44 @@
+<dashboard version="1.1" theme="dark">
+  <label>SOC Home-Lab Detection Dashboard</label>
+  <description>Detects brute-force logins, unauthorized account creation and obfuscated PowerShell execution</description>
+  <row>
+    <panel>
+      <chart>
+        <title>Failed Login Attempts Over Time</title>
+        <search>
+          <query>index=main EventCode=4625 | bucket _time span=1h | stats count by _time | rename count as "Failed_Logins"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>New User Accounts Created</title>
+        <search>
+          <query>index=main EventCode=4720 | table _time, Subject_Account_Name, Account_Name, ComputerName | rename Subject_Account_Name as "New_Account_Created", Account_Name as "Created_By"</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Suspicious PowerShell Executions</title>
+        <search>
+          <query>index=main EventCode=4688 New_Process_Name=*powershell* (Process_Command_Line=*EncodedCommand* OR Process_Command_Line=*ExecutionPolicy*Bypass* OR Process_Command_Line=*-enc*) | table _time, Account_Name, New_Process_Name, Process_Command_Line</query>
+          <earliest>-7d@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
